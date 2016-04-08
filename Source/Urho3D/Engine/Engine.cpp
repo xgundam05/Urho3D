@@ -107,7 +107,10 @@ Engine::Engine(Context* context) :
     initialized_(false),
     exiting_(false),
     headless_(false),
-    audioPaused_(false)
+    audioPaused_(false),
+#if defined(RPI)
+    renderToTFT_(false)
+#endif
 {
     // Register self as a subsystem
     context_->RegisterSubsystem(this);
@@ -167,6 +170,19 @@ bool Engine::Initialize(const VariantMap& parameters)
     {
         context_->RegisterSubsystem(new Graphics(context_));
         context_->RegisterSubsystem(new Renderer(context_));
+
+#if defined(RPI)
+        // TFT Display create
+        if (HasParameter(parameters, "EnableTFT"))
+        {
+            renderToTFT_ = GetParameter(parameters, "EnableTFT", false).GetBool();
+            tftDisplay_ = new TFTDisplay(context_);
+
+            if (renderToTFT_)
+                tftDisplay_->InitializeTFT(GetParameter(parameters, "TFTFramebuffer", "/dev/fb1").GetString());
+        }
+#endif
+
     }
     else
     {
@@ -365,8 +381,13 @@ bool Engine::Initialize(const VariantMap& parameters)
 #endif
 
         if (!graphics->SetMode(
+#if defined(RPI)
+            GetParameter(parameters, "WindowWidth", tftDisplay_->GetWidth()).GetInt(),
+            GetParameter(parameters, "WindowHeight", tftDisplay_->GetHeight()).GetInt(),
+#else
             GetParameter(parameters, "WindowWidth", 0).GetInt(),
             GetParameter(parameters, "WindowHeight", 0).GetInt(),
+#endif
             GetParameter(parameters, "FullScreen", true).GetBool(),
             GetParameter(parameters, "Borderless", false).GetBool(),
             GetParameter(parameters, "WindowResizable", false).GetBool(),
@@ -398,6 +419,14 @@ bool Engine::Initialize(const VariantMap& parameters)
                 GetParameter(parameters, "SoundInterpolation", true).GetBool()
             );
         }
+
+#if defined(RPI)
+        if (renderToTFT_)
+        {
+            tftDisplay_->InitializeSourceBuffer(GetParameter(parameters, "TFTSourceBuffer", 0).GetInt());
+            tftDisplay_->InitializeMemoryMap();
+        }
+#endif
     }
 
     // Init FPU state of main thread
@@ -664,6 +693,12 @@ void Engine::Render()
 
     GetSubsystem<Renderer>()->Render();
     GetSubsystem<UI>()->Render();
+
+#if defined(RPI)
+    if (renderToTFT_)
+        tftDisplay_->CopyToTFT();
+#endif
+
     graphics->EndFrame();
 }
 

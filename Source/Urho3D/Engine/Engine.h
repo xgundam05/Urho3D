@@ -25,6 +25,10 @@
 #include "../Core/Object.h"
 #include "../Core/Timer.h"
 
+#ifdef RPI
+#include "../Graphics/TFTDisplay.h"
+#endif
+
 namespace Urho3D
 {
 
@@ -154,6 +158,12 @@ private:
     bool headless_;
     /// Audio paused flag.
     bool audioPaused_;
+#ifdef RPI
+    /// TFT Display codifications
+    SharedPtr<TFTDisplay> tftDisplay_;
+    /// TFT Rendering enabled
+    bool renderToTFT_;
+#endif
 };
 
 }

@@ -73,13 +73,13 @@ private:
     DISPMANX_RESOURCE_HANDLE_T screenResource_;
     VC_IMAGE_TRANSFORM_T transform_;
     uint32_t imagePrt_;
-    VC_RECT rect_;
+    VC_RECT_T rect_;
     int fbfd_;
     char* fbp_;
 
     struct fb_var_screeninfo vinfo_;
     struct fb_fix_screeninfo finfo_;
-}
+};
 
 }
 
