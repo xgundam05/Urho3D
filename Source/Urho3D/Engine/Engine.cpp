@@ -100,6 +100,9 @@ Engine::Engine(Context* context) :
     maxInactiveFps_(60),
     pauseMinimized_(false),
 #endif
+#if defined(RPI)
+    renderToTFT_(false),
+#endif
 #ifdef URHO3D_TESTING
     timeOut_(0),
 #endif
@@ -107,10 +110,7 @@ Engine::Engine(Context* context) :
     initialized_(false),
     exiting_(false),
     headless_(false),
-    audioPaused_(false),
-#if defined(RPI)
-    renderToTFT_(false)
-#endif
+    audioPaused_(false)
 {
     // Register self as a subsystem
     context_->RegisterSubsystem(this);
