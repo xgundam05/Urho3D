@@ -196,26 +196,6 @@ static Image* Texture2DGetImage(Texture2D* tex2d)
     return rawImage;
 }
 
-static bool Texture2DSetData(Image* image, bool useAlpha, Texture2D* ptr)
-{
-    return ptr->SetData(SharedPtr<Image>(image), useAlpha);
-}
-
-static bool Texture2DArraySetData(unsigned layer, Image* image, bool useAlpha, Texture2DArray* ptr)
-{
-    return ptr->SetData(layer, SharedPtr<Image>(image), useAlpha);
-}
-
-static bool Texture3DSetData(Image* image, bool useAlpha, Texture3D* ptr)
-{
-    return ptr->SetData(SharedPtr<Image>(image), useAlpha);
-}
-
-static bool TextureCubeSetData(CubeMapFace face, Image* image, bool useAlpha, TextureCube* ptr)
-{
-    return ptr->SetData(face, SharedPtr<Image>(image), useAlpha);
-}
-
 static Image* TextureCubeGetImage(CubeMapFace face, TextureCube* texCube)
 {
     Image* rawImage = new Image(texCube->GetContext());
@@ -529,24 +509,24 @@ static void RegisterTextures(asIScriptEngine* engine)
 
     RegisterTexture<Texture2D>(engine, "Texture2D");
     engine->RegisterObjectMethod("Texture2D", "bool SetSize(int, int, uint, TextureUsage usage = TEXTURE_STATIC)", asMETHOD(Texture2D, SetSize), asCALL_THISCALL);
-    engine->RegisterObjectMethod("Texture2D", "bool SetData(Image@+, bool useAlpha = false)", asFUNCTION(Texture2DSetData), asCALL_CDECL_OBJLAST);
+    engine->RegisterObjectMethod("Texture2D", "bool SetData(Image@+, bool useAlpha = false)", asMETHODPR(Texture2D, SetData, (Image*, bool), bool), asCALL_THISCALL);
     engine->RegisterObjectMethod("Texture2D", "RenderSurface@+ get_renderSurface() const", asMETHOD(Texture2D, GetRenderSurface), asCALL_THISCALL);
     engine->RegisterObjectMethod("Texture2D", "Image@+ GetImage() const", asFUNCTION(Texture2DGetImage), asCALL_CDECL_OBJLAST);
 
     RegisterTexture<Texture2DArray>(engine, "Texture2DArray");
     engine->RegisterObjectMethod("Texture2DArray", "bool SetSize(uint, int, int, uint, TextureUsage usage = TEXTURE_STATIC)", asMETHOD(Texture2DArray, SetSize), asCALL_THISCALL);
-    engine->RegisterObjectMethod("Texture2DArray", "bool SetData(uint, Image@+, bool useAlpha = false)", asFUNCTION(Texture2DArraySetData), asCALL_CDECL_OBJLAST);
+    engine->RegisterObjectMethod("Texture2DArray", "bool SetData(uint, Image@+, bool useAlpha = false)", asMETHODPR(Texture2DArray, SetData, (unsigned, Image*, bool), bool), asCALL_THISCALL);
     engine->RegisterObjectMethod("Texture2DArray", "void set_layers(uint)", asMETHOD(Texture2DArray, SetLayers), asCALL_THISCALL);
     engine->RegisterObjectMethod("Texture2DArray", "uint get_layers() const", asMETHOD(Texture2DArray, GetLayers), asCALL_THISCALL);
     engine->RegisterObjectMethod("Texture2DArray", "RenderSurface@+ get_renderSurface() const", asMETHOD(Texture2DArray, GetRenderSurface), asCALL_THISCALL);
 
     RegisterTexture<Texture3D>(engine, "Texture3D");
     engine->RegisterObjectMethod("Texture3D", "bool SetSize(int, int, int, uint, TextureUsage usage = TEXTURE_STATIC)", asMETHOD(Texture3D, SetSize), asCALL_THISCALL);
-    engine->RegisterObjectMethod("Texture3D", "bool SetData(Image@+, bool useAlpha = false)", asFUNCTION(Texture3DSetData), asCALL_CDECL_OBJLAST);
+    engine->RegisterObjectMethod("Texture3D", "bool SetData(Image@+, bool useAlpha = false)", asMETHODPR(Texture3D, SetData, (Image*, bool), bool), asCALL_THISCALL);
 
     RegisterTexture<TextureCube>(engine, "TextureCube");
     engine->RegisterObjectMethod("TextureCube", "bool SetSize(int, uint, TextureUsage usage = TEXTURE_STATIC)", asMETHOD(TextureCube, SetSize), asCALL_THISCALL);
-    engine->RegisterObjectMethod("TextureCube", "bool SetData(CubeMapFace, Image@+, bool useAlpha = false)", asFUNCTION(TextureCubeSetData), asCALL_CDECL_OBJLAST);
+    engine->RegisterObjectMethod("TextureCube", "bool SetData(CubeMapFace, Image@+, bool useAlpha = false)", asMETHODPR(TextureCube, SetData, (CubeMapFace, Image*, bool), bool), asCALL_THISCALL);
     engine->RegisterObjectMethod("TextureCube", "Image@+ GetImage(CubeMapFace) const", asFUNCTION(TextureCubeGetImage), asCALL_CDECL_OBJLAST); 
     engine->RegisterObjectMethod("TextureCube", "RenderSurface@+ get_renderSurfaces(CubeMapFace) const", asMETHOD(TextureCube, GetRenderSurface), asCALL_THISCALL);
 
@@ -948,18 +928,6 @@ static void RegisterModel(asIScriptEngine* engine)
     engine->RegisterObjectMethod("Model", "uint get_numMorphs() const", asMETHOD(Model, GetNumMorphs), asCALL_THISCALL);
 }
 
-static CScriptArray* AnimationGetTrackNames(Animation* animation)
-{
-    Vector<String> result;
-
-    const HashMap<StringHash, AnimationTrack>& parameters = animation->GetTracks();
-    for (HashMap<StringHash, AnimationTrack>::ConstIterator i = parameters.Begin(); i != parameters.End(); ++i)
-        result.Push(i->second_.name_);
-
-    Sort(result.Begin(), result.End());
-    return VectorToArray<String>(result, "Array<String>");
-}
-
 static void ConstructAnimationKeyFrame(AnimationKeyFrame* ptr)
 {
     new(ptr)AnimationKeyFrame();
@@ -1064,9 +1032,7 @@ static void RegisterAnimation(asIScriptEngine* engine)
     engine->RegisterObjectMethod("Animation", "const String& get_animationName() const", asMETHOD(Animation, GetAnimationName), asCALL_THISCALL);
     engine->RegisterObjectMethod("Animation", "void set_length(float)", asMETHOD(Animation, SetLength), asCALL_THISCALL);
     engine->RegisterObjectMethod("Animation", "float get_length() const", asMETHOD(Animation, GetLength), asCALL_THISCALL);
-    engine->RegisterObjectMethod("Animation", "Array<String>@ get_trackNames() const", asFUNCTION(AnimationGetTrackNames), asCALL_CDECL_OBJLAST);
-    engine->RegisterObjectMethod("Animation", "AnimationTrack@+ GetTrack(const String&in)", asMETHODPR(Animation, GetTrack, (const String&), AnimationTrack*), asCALL_THISCALL);
-    engine->RegisterObjectMethod("Animation", "AnimationTrack@+ GetTrack(StringHash)", asMETHODPR(Animation, GetTrack, (StringHash), AnimationTrack*), asCALL_THISCALL);
+    engine->RegisterObjectMethod("Animation", "AnimationTrack@+ get_tracks(const String&in)", asMETHODPR(Animation, GetTrack, (const String&), AnimationTrack*), asCALL_THISCALL);
     engine->RegisterObjectMethod("Animation", "uint get_numTracks() const", asMETHOD(Animation, GetNumTracks), asCALL_THISCALL);
     engine->RegisterObjectMethod("Animation", "void set_numTriggers(uint)", asMETHOD(Animation, SetNumTriggers), asCALL_THISCALL);
     engine->RegisterObjectMethod("Animation", "uint get_numTriggers() const", asMETHOD(Animation, GetNumTriggers), asCALL_THISCALL);
@@ -1269,6 +1235,11 @@ static AnimationState* ConstructAnimationState(Node* node, Animation* animation)
     return new AnimationState(node, animation);
 }
 
+static void AnimationStateSetBoneWeight(const String& name, float weight, AnimationState* ptr)
+{
+    ptr->SetBoneWeight(name, weight);
+}
+
 static void RegisterAnimatedModel(asIScriptEngine* engine)
 {
     RegisterRefCounted<AnimationState>(engine, "AnimationState");
@@ -1306,6 +1277,8 @@ static void RegisterAnimatedModel(asIScriptEngine* engine)
     engine->RegisterObjectMethod("AnimationState", "Node@+ get_node() const", asMETHOD(AnimationState, GetNode), asCALL_THISCALL);
     engine->RegisterObjectMethod("AnimationState", "bool get_enabled() const", asMETHOD(AnimationState, IsEnabled), asCALL_THISCALL);
     engine->RegisterObjectMethod("AnimationState", "float get_length() const", asMETHOD(AnimationState, GetLength), asCALL_THISCALL);
+    engine->RegisterObjectMethod("AnimationState", "void set_boneWeights(const String&in, float)", asFUNCTION(AnimationStateSetBoneWeight), asCALL_CDECL_OBJLAST);
+    engine->RegisterObjectMethod("AnimationState", "float get_boneWeights(const String&in)", asMETHODPR(AnimationState, GetBoneWeight, (const String&) const, float), asCALL_THISCALL);
     engine->RegisterObjectMethod("AnimatedModel", "AnimationState@+ AddAnimationState(Animation@+)", asMETHOD(AnimatedModel, AddAnimationState), asCALL_THISCALL);
     engine->RegisterObjectMethod("AnimatedModel", "void RemoveAnimationState(Animation@+)", asMETHODPR(AnimatedModel, RemoveAnimationState, (Animation*), void), asCALL_THISCALL);
     engine->RegisterObjectMethod("AnimatedModel", "void RemoveAnimationState(const String&in)", asMETHODPR(AnimatedModel, RemoveAnimationState, (const String&), void), asCALL_THISCALL);

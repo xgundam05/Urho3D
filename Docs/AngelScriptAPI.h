@@ -296,8 +296,6 @@ class Animation
 void AddTrigger(const AnimationTriggerPoint&);
 void AddTrigger(float, bool, const Variant&);
 AnimationTrack CreateTrack(const String&);
-AnimationTrack GetTrack(StringHash);
-AnimationTrack GetTrack(const String&);
 bool HasSubscribedToEvent(Object, const String&);
 bool HasSubscribedToEvent(const String&);
 bool Load(File);
@@ -324,7 +322,7 @@ uint numTriggers;
 /* readonly */
 int refs;
 /* readonly */
-Array<String> trackNames;
+Array<AnimationTrack> tracks;
 Array<AnimationTriggerPoint> triggers;
 /* readonly */
 StringHash type;
@@ -497,6 +495,7 @@ void SetBoneWeight(uint, float, bool = false);
 /* readonly */
 Animation animation;
 AnimationBlendMode blendMode;
+Array<float> boneWeights;
 /* readonly */
 bool enabled;
 uint8 layer;
@@ -5384,6 +5383,8 @@ bool focus;
 Array<JoystickState> joysticks;
 /* readonly */
 Array<JoystickState> joysticksByIndex;
+/* readonly */
+Array<JoystickState> joysticksByName;
 /* readonly */
 Array<bool> keyDown;
 /* readonly */

@@ -2726,8 +2726,6 @@ Methods:
 - void AddTrigger(const AnimationTriggerPoint&)
 - void AddTrigger(float, bool, const Variant&)
 - AnimationTrack@ CreateTrack(const String&)
-- AnimationTrack@ GetTrack(StringHash)
-- AnimationTrack@ GetTrack(const String&)
 - bool HasSubscribedToEvent(Object@, const String&)
 - bool HasSubscribedToEvent(const String&)
 - bool Load(File@)
@@ -2750,7 +2748,7 @@ Properties:
 - uint numTracks // readonly
 - uint numTriggers
 - int refs // readonly
-- String[]@ trackNames // readonly
+- AnimationTrack@[] tracks // readonly
 - AnimationTriggerPoint[] triggers
 - StringHash type // readonly
 - String typeName // readonly
@@ -2909,6 +2907,7 @@ Properties:
 
 - Animation@ animation // readonly
 - AnimationBlendMode blendMode
+- float[] boneWeights
 - bool enabled // readonly
 - uint8 layer
 - float length // readonly
@@ -7189,6 +7188,7 @@ Properties:
 - bool focus // readonly
 - JoystickState@[] joysticks // readonly
 - JoystickState@[] joysticksByIndex // readonly
+- JoystickState@[] joysticksByName // readonly
 - bool[] keyDown // readonly
 - bool[] keyPress // readonly
 - bool minimized // readonly
